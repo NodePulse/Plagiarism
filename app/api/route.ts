@@ -20,7 +20,7 @@ export async function POST (req: NextRequest, res: NextResponse) {
       chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
       const payload = { contents: chatHistory };
-      const apiKey = process.env.GEMINI_API_KEY; // Canvas will automatically provide the API key
+      const apiKey = process.env.GEMINI_API_KEY;
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(apiUrl, {
