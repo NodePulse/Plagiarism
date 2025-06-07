@@ -9,7 +9,6 @@ export default function Home() {
   const [language, setLanguage] = useState("Python")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [message, setMessage] = useState("")
   const [selectedTransformations, setSelectedTransformations] = useState({
     renameVariables: true,
     addComments: false,
@@ -20,7 +19,6 @@ export default function Home() {
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode(e.target.value)
     setFinalCode("")
-    setMessage("")
   }
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -49,7 +47,6 @@ export default function Home() {
   const transformCode = async () => {
     setIsLoading(true);
     setError('');
-    setMessage('');
 
     try {
       const res = await fetch("/api", {
@@ -67,7 +64,6 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Unknown error");
 
       setFinalCode(data.transformedCode);
-      setMessage("Code transformed successfully!");
     } catch (error: any) {
       setError(error.message);
     } finally {
