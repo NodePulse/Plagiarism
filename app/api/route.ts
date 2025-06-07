@@ -16,7 +16,7 @@ export async function POST (req: NextRequest) {
     prompt += `\n\nOriginal ${language} code:\n\`\`\`${language}\n${code}\n\`\`\`\n\nProvide only the refactored ${language} code within a single \`\`\`${language}\`\`\` block. Do not include any introductory or concluding text.`;
 
     try {
-      let chatHistory = [];
+      const chatHistory = [];
       chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
       const payload = { contents: chatHistory };
