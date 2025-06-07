@@ -64,8 +64,12 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Unknown error");
 
       setFinalCode(data.transformedCode);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(String(error));
+      }
     } finally {
       setIsLoading(false)
     }
