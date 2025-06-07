@@ -37,5 +37,5 @@ A sleek web app that detects and removes plagiarism from code using the Gemini A
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/code-plagiarism-remover.git
-cd code-plagiarism-remover
+git clone https://github.com/NodePulse/Plagiarism.git
+cd Plagiarism
