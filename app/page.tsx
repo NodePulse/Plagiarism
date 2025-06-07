@@ -1,103 +1,211 @@
-import Image from "next/image";
+"use client"
+
+import React, { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [code, setCode] = useState("")
+  const [finalCode, setFinalCode] = useState("")
+  const [language, setLanguage] = useState("Python")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
+  const [selectedTransformations, setSelectedTransformations] = useState({
+    renameVariables: true,
+    addComments: false,
+    reformatCode: false,
+    restructureLogic: false
+  });
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCode(e.target.value)
+    setFinalCode("")
+    setMessage("")
+  }
+
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value);
+  };
+
+  const handleTransformationChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const target = e.target;
+    const { name } = target;
+
+    if (target instanceof HTMLInputElement) {
+      setSelectedTransformations(prevState => ({
+        ...prevState,
+        [name]: target.checked,
+      }));
+    } else {
+      setSelectedTransformations(prevState => ({
+        ...prevState,
+        [name]: target.value,
+      }));
+    }
+  };
+
+  const transformCode = async () => {
+    setIsLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      const res = await fetch("/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code,
+          language,
+          selectedTransformations
+        })
+      })
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Unknown error");
+
+      setFinalCode(data.transformedCode);
+      setMessage("Code transformed successfully!");
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false)
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="rounded-lg shadow-xl w-full max-w-6xl">
+        <h1 className="text-4xl font-extrabold text-center text-gray-300 mb-8 rounded-md p-3">Remove Plagiarism from your code</h1>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div>
+          <label htmlFor="input-code" className="block text-lg font-medium mb-2 pl-2">
+            Enter Your Code Here:
+          </label>
+          <textarea
+            id="input-code"
+            className="w-full p-4 border border-gray-300 rounded-md shadow-sm text-slate-300 font-mono resize-y min-h-[250px] scrollbar-hidden"
+            value={code}
+            onChange={handleCodeChange}
+            placeholder="Paste your code here..."
+            rows={10}
+            cols={50}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div>
+          <label htmlFor="output-code" className="block text-lg font-medium mb-2 pl-2">
+            Transformed Code:
+          </label>
+          <textarea
+            id="output-code"
+            className="w-full p-4 border border-gray-300 rounded-md shadow-sm text-slate-300 font-mono resize-y min-h-[250px] scrollbar-hidden"
+            value={finalCode}
+            readOnly
+            placeholder="Transformed code will appear here..."
+            rows={10}
+            cols={50}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+      </div>
+
+      <div className="p-6 rounded-lg shadow-inner mb-8">
+        <div className="mb-6">
+          <label htmlFor="language-select" className="block text-lg font-medium text-gray-200 mb-2">
+            Select Programming Language:
+          </label>
+          <select
+            id="language-select"
+            className="w-full md:w-1/2 p-3 border bg-gray-900 border-gray-300 rounded-md shadow-sm text-gray-200"
+            value={language}
+            onChange={handleLanguageChange}
+          >
+            <option value="python">Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+            <option value="c++">C++</option>
+            <option value="c#">C#</option>
+            <option value="go">Go</option>
+            <option value="php">PHP</option>
+            <option value="ruby">Ruby</option>
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-lg font-medium text-gray-200 mb-3">Transformation Options:</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className="flex items-center text-gray-200">
+              <input
+                type="checkbox"
+                name="renameVariables"
+                checked={selectedTransformations.renameVariables}
+                onChange={handleTransformationChange}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded"
+              />
+              <span className="ml-2">Rename Variables & Functions</span>
+            </label>
+            <label className="flex items-center text-gray-200">
+              <input
+                type="checkbox"
+                name="addComments"
+                checked={selectedTransformations.addComments}
+                onChange={handleTransformationChange}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded"
+              />
+              <span className="ml-2">Add/Rephrase Comments</span>
+            </label>
+            <label className="flex items-center text-gray-200">
+              <input
+                type="checkbox"
+                name="reformatCode"
+                checked={selectedTransformations.reformatCode}
+                onChange={handleTransformationChange}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded"
+              />
+              <span className="ml-2">Reformat Code (Indentation, Spacing)</span>
+            </label>
+            <label className="flex items-center text-gray-200">
+              <input
+                type="checkbox"
+                name="restructureLogic"
+                checked={selectedTransformations.restructureLogic}
+                onChange={handleTransformationChange}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded"
+              />
+              <span className="ml-2">Slightly Restructure Logic</span>
+            </label>
+          </div>
+        </div>
+
+        <button
+          onClick={transformCode}
+          className={`w-full py-3 px-6 rounded-md text-white font-semibold transition-all duration-300
+                                    ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'}`}
+          disabled={isLoading || !code.trim()}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {isLoading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Transforming Code...
+            </span>
+          ) : (
+            'Transform Code'
+          )}
+        </button>
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+            <strong className="font-bold">Error!</strong>
+            <span className="block sm:inline ml-2">{error}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
