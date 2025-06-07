@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST (req: NextRequest, res: NextResponse) {
+export async function POST (req: NextRequest) {
     const { code, language, selectedTransformations } = await req.json();
     let prompt = `Refactor the following ${language} code to make it appear less syntactically and structurally similar to its original form, while strictly preserving its functionality and correctness. `;
     prompt += `Apply the following transformations: `;
