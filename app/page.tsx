@@ -6,7 +6,6 @@ export default function Home() {
 
   const [code, setCode] = useState("")
   const [finalCode, setFinalCode] = useState("")
-  const [language, setLanguage] = useState("Python")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [selectedTransformations, setSelectedTransformations] = useState({
@@ -20,10 +19,6 @@ export default function Home() {
     setCode(e.target.value)
     setFinalCode("")
   }
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value);
-  };
 
   const handleTransformationChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -54,7 +49,6 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code,
-          language,
           selectedTransformations
         })
       })
@@ -113,27 +107,6 @@ export default function Home() {
       </div>
 
       <div className="p-6 rounded-lg shadow-inner mb-8">
-        <div className="mb-6">
-          <label htmlFor="language-select" className="block text-lg font-medium text-gray-200 mb-2">
-            Select Programming Language:
-          </label>
-          <select
-            id="language-select"
-            className="w-full md:w-1/2 p-3 border bg-gray-900 border-gray-300 rounded-md shadow-sm text-gray-200"
-            value={language}
-            onChange={handleLanguageChange}
-          >
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
-            <option value="java">Java</option>
-            <option value="c++">C++</option>
-            <option value="c#">C#</option>
-            <option value="go">Go</option>
-            <option value="php">PHP</option>
-            <option value="ruby">Ruby</option>
-          </select>
-        </div>
-
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-200 mb-3">Transformation Options:</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

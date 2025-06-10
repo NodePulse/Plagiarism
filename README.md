@@ -18,9 +18,9 @@ A sleek web app that detects and removes plagiarism from code using the Gemini A
 
 ---
 
-## 🖼️ Demo
+## 🖼️ Live Link
 
-> Coming soon...
+> https://plagiarism-sand.vercel.app/
 
 ---
 

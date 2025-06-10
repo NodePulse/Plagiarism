@@ -1,7 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST (req: NextRequest) {
-    const { code, language, selectedTransformations } = await req.json();
+    const { code, selectedTransformations } = await req.json();
+    let language = ""
+
+    const recognize_language = `${code} \n Recognize the language of code and give answer in one word.`
+    console.log(recognize_language)
+
+    try {
+      const chatHistory = [];
+      chatHistory.push({ role: "user", parts: [{ text: recognize_language }] });
+
+      const payload = { contents: chatHistory };
+      const apiKey = process.env.GEMINI_API_KEY;
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      // console.log(result?.candidates[0]?.content.parts[0].text)
+
+      // if (result.candidates && result.candidates.length > 0 &&
+      //   result.candidates[0].content && result.candidates[0].content.parts &&
+      //   result.candidates[0].content.parts.length > 0) {
+      //   const llmResponseText = result.candidates[0].content.parts[0].text;
+      //   const codeMatch = llmResponseText?.match(/```[^\n]*\n([\s\S]*?)```/);
+      //   const transformedCode = codeMatch?.[1]?.trim() || llmResponseText?.trim();
+      //   return NextResponse.json({transformedCode});
+      // }
+      language = result?.candidates[0]?.content.parts[0].text.trim()
+    } catch (err) {
+      console.error('Transformation error:', err);
+    }
+
+    if(language === "") {
+      return NextResponse.json({message: "Language not recognized"})
+    }
+
     let prompt = `Refactor the following ${language} code to make it appear less syntactically and structurally similar to its original form, while strictly preserving its functionality and correctness. `;
     prompt += `Apply the following transformations: `;
 
@@ -30,7 +69,7 @@ export async function POST (req: NextRequest) {
       });
 
       const result = await response.json();
-      console.log(result?.candidates[0]?.content.parts[0].text)
+      // console.log(result?.candidates[0]?.content.parts[0].text)
 
       if (result.candidates && result.candidates.length > 0 &&
         result.candidates[0].content && result.candidates[0].content.parts &&
@@ -42,7 +81,7 @@ export async function POST (req: NextRequest) {
       }
     } catch (err) {
       console.error('Transformation error:', err);
-}
+    }
 }
 
 export function GET() {
